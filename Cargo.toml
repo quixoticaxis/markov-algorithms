@@ -22,7 +22,7 @@ path = "src/simple_cli.rs"
 thiserror = "1.*"
 
 [dependencies.clap]
-version = "3.0"
+version = "3.*"
 default-features = true
 features = ["derive"]
 
