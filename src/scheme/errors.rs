@@ -9,7 +9,7 @@ pub enum AlgorithmSchemeCreationError {
     #[error("an empty line was encountered in the scheme definition")]
     EncounteredEmptyLine,
     /// One of the lines fails to be parsed as a substitution formula. See the source error.
-    #[error("failed to created substitution formula: \"{source}\"")]
+    #[error("failed to created substitution formula: {source}")]
     FormulaCreationFailed {
         #[from]
         source: SubstitutionFormulaCreationError,
