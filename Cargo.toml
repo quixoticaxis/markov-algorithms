@@ -1,9 +1,10 @@
 [package]
 name = "markov-algorithms"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "GPL-3.0"
 description = "Rust implementation of Markov algorithms."
+documentation = "https://docs.rs/markov-algorithms"
 repository = "https://github.com/quixoticaxis/markov-algorithms"
 readme = "README.md"
 
@@ -13,12 +14,17 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "markovalgorithms-cli"
-path = "src/bin.rs"
+path = "src/simple_cli.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 thiserror = "1.*"
+
+[dependencies.clap]
+version = "3.0"
+default-features = true
+features = ["derive"]
 
 [dev-dependencies]
 rand= "0.8.*"
