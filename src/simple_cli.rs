@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{self, Error, Read},
+    io::Read,
     path::{Path, PathBuf},
 };
 
@@ -80,7 +80,7 @@ fn read_scheme_definition(path: PathBuf) -> Option<String> {
                 }
             }
             Err(error) => {
-                println!("Could not open the file: {path:?}. Encountered an error: {error:?}.")
+                println!("Could not open the file: {path:?}. Encountered an error: {error}.")
             }
         };
     } else {
