@@ -9,6 +9,7 @@ use std::fmt::Display;
 
 pub use configuration::SubstitutionFormulaConfiguration;
 pub use errors::{AlgorithmSchemeApplicationError, AlgorithmSchemeCreationError};
+pub use formulas::SubstitutionFormulaCreationError;
 use formulas::{SubstitutionFormula, SubstitutionResult};
 
 /// A scheme of [Markov Algorithm](https://en.wikipedia.org/wiki/Markov_algorithm).

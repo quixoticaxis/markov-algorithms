@@ -17,7 +17,7 @@ pub struct SubstitutionFormulaConfiguration {
 }
 
 impl SubstitutionFormulaConfiguration {
-    /// Creates a new configuraion. Assumes latin alphabet with numbers and '|' to be used.
+    /// Creates a new configuraion. Assumes latin letters, digits, and '|' to be used.
     ///
     /// # Arguments
     ///

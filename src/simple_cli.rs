@@ -10,16 +10,27 @@ use markovalgorithms::{AlgorithmScheme, SubstitutionFormulaConfiguration};
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 struct CliParser {
+    /// A UTF-8 file with scheme definition
     #[clap(short, long, value_parser, value_name = "SCHEME_FILE")]
     scheme_definition_file: PathBuf,
+    
+    /// A string to apply the scheme to
     #[clap(long, value_parser)]
     string: String,
-    #[clap(long, value_parser)]
+    
+    /// The maximum number of times the scheme would be applied to the string
+    #[clap(default_value_t = 10_000, long, value_parser)]
     limit: u32,
+    
+    /// The character to be used as a delimiter of left and right substitution formula parts
     #[clap(long, value_parser)]
     delimiter: Option<char>,
+    
+    /// The character to be used to mark a substitution formula as final
     #[clap(long, value_parser)]
     final_marker: Option<char>,
+
+    /// The string containing all of the characters of the extended alphabet to be used
     #[clap(long, value_parser)]
     alphabet: Option<String>,
 }
