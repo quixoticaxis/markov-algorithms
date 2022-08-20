@@ -259,7 +259,7 @@ fn alphabet_can_be_cloned() {
     let set: HashSet<_> = ('a'..='z').into_iter().collect();
 
     let alphabet = Alphabet::try_from(&set).unwrap();
-    
+
     #[allow(clippy::redundant_clone)]
     let _clone = alphabet.clone();
 }

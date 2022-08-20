@@ -26,30 +26,30 @@ use thiserror::Error;
 mod tests;
 
 /// An alphabet that contains the main set of characters and an extension.
-/// 
+///
 /// # Example
 /// Basic usage:
 /// ```rust
 /// # use std::str;
 /// use markovalgorithms::prelude::Alphabet;
-/// 
+///
 /// let alphabet = str::parse::<Alphabet>("ab").unwrap()
 ///     .extend('|').unwrap()
 ///     .extend('+').unwrap();
-/// 
+///
 /// assert!(alphabet.contains('a') && alphabet.contains('b'));
 /// assert!(!alphabet.contains('|') && !alphabet.contains('+'));
 /// assert!(alphabet.contains_extended('|') && alphabet.contains_extended('+'));
 /// ```
-/// 
+///
 /// An alphabet can also be created based on non-empty [HashSet](std::collections::HashSet) of `char`s:
 /// ```rust
 /// # use std::collections::HashSet;
 /// use markovalgorithms::prelude::Alphabet;
-/// 
+///
 /// let set: HashSet<_> = ('a'..='z').into_iter().collect();
 /// let alphabet = Alphabet::try_from(&set).unwrap();
-/// 
+///
 /// assert!(alphabet.contains('k'));
 /// ```
 #[derive(Debug, Clone)]
@@ -60,26 +60,26 @@ pub struct Alphabet {
 
 impl Alphabet {
     /// Checks whether the character belongs to the alphabet.
-    /// 
+    ///
     /// # Returns
-    /// `true`, if the character belongs to the alphabet, and `false` otherwise. 
+    /// `true`, if the character belongs to the alphabet, and `false` otherwise.
     pub fn contains(&self, character: char) -> bool {
         self.main.contains(&character)
     }
 
     /// Checks whether the character belongs to the alphabet or its extension.
-    /// 
+    ///
     /// # Returns
-    /// `true`, if the character belongs to the alphabet or its extension, and `false` otherwise. 
+    /// `true`, if the character belongs to the alphabet or its extension, and `false` otherwise.
     pub fn contains_extended(&self, character: char) -> bool {
         self.main.contains(&character) || self.extension.contains(&character)
     }
 
     /// Extends the alphabet with a given character.
-    /// 
+    ///
     /// # Returns
     /// Consumes and returns `self`.
-    /// 
+    ///
     /// # Errors
     /// Returns an [error](AlphabetDefinitionError)
     /// if the character belongs to the alphabet or its extension.

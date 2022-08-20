@@ -19,11 +19,7 @@
 
 mod input;
 
-use std::{
-    fs::File,
-    io::Read,
-    path::PathBuf,
-};
+use std::{fs::File, io::Read, path::PathBuf};
 
 use anyhow::{Context, Ok, Result};
 use clap::{ArgGroup, Parser};
@@ -89,7 +85,7 @@ struct Cli {
     scheme: PathBuf,
 
     /// An input string.
-    #[clap(value_parser,  value_name = "INPUT")]
+    #[clap(value_parser, value_name = "INPUT")]
     string: String,
 
     /// When set, defines the limit of steps the algorithm is allowed to take.

@@ -34,13 +34,13 @@ use crate::{
 use super::SubstitutionFormula;
 
 /// A builder to configure an algorithm scheme.
-/// 
+///
 /// # Example
 /// Basic usage:
 /// ```rust
 /// # use std::str;
 /// use markovalgorithms::prelude::*;
-/// 
+///
 /// let builder = AlgorithmSchemeBuilder::new()
 ///     .with_alphabet(str::parse("abc").unwrap())
 ///     .with_delimiter('→')
@@ -104,12 +104,12 @@ impl AlgorithmSchemeBuilder {
     }
 
     /// Builds an algorithm scheme based on the provided definitions.
-    /// 
+    ///
     /// # Example
     /// Basic usage:
     /// ```rust
     /// use markovalgorithms::prelude::*;
-    /// 
+    ///
     /// let scheme = AlgorithmSchemeBuilder::new()
     ///     .build_with_formula_definitions(
     ///         "a→b\nb→c".lines())

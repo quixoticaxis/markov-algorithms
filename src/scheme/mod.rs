@@ -31,22 +31,22 @@ use crate::alphabet::Alphabet;
 pub mod scheme_builder;
 
 /// An algorithm scheme, can be applied to process input strings.
-/// 
+///
 /// # Examples
 /// The scheme can be applied until the algorithm completes:
 /// ```rust
 /// # use std::str;
 /// use markovalgorithms::prelude::*;
-/// 
+///
 /// let alphabet = str::parse::<Alphabet>("abc").unwrap().extend('d').unwrap();
 ///
 /// let scheme = AlgorithmSchemeBuilder::new()
 ///     .with_alphabet(alphabet)
 ///     .build_with_formula_definitions(["a→⋅d"].into_iter())
 ///     .unwrap();
-/// 
+///
 /// let result = scheme.apply("abc", 1).unwrap();
-/// 
+///
 /// assert_eq!("dbc", result.word());
 /// assert_eq!(1, result.steps_done());
 /// ```
@@ -54,36 +54,36 @@ pub mod scheme_builder;
 /// ```rust
 /// # use std::str;
 /// use markovalgorithms::prelude::*;
-/// 
+///
 /// let alphabet = str::parse::<Alphabet>("abc").unwrap().extend('d').unwrap();
-/// 
+///
 /// let scheme = AlgorithmSchemeBuilder::new()
 ///     .with_alphabet(alphabet)
 ///     .build_with_formula_definitions(["a→⋅d"].into_iter())
 ///     .unwrap();
-/// 
+///
 /// let result = scheme.apply_once("abc").unwrap();
-/// 
+///
 /// let result = if let SingleApplicationResult::Final(result) = result {
 ///     Some(result)
 /// } else {
 ///     None
 /// }.unwrap();
-/// 
+///
 /// assert_eq!("dbc", result.word());
 /// assert_eq!(Some("a→⋅d"), result.applied_formula_definition())
 /// ```
 /// The scheme can provide an iterator to inspect the algorithm step by step:
 /// ```rust
 /// use markovalgorithms::prelude::*;
-/// 
+///
 /// let alphabet = str::parse::<Alphabet>("abc").unwrap().extend('d').unwrap();
-/// 
+///
 /// let scheme = AlgorithmSchemeBuilder::new()
 ///     .with_alphabet(alphabet)
 ///     .build_with_formula_definitions(["a→⋅d"].into_iter())
 ///     .unwrap();
-/// 
+///
 /// let mut iterator = scheme.get_application_iterator("abc").unwrap();
 ///  
 /// assert_eq!("dbc", iterator.next().unwrap().word());
@@ -108,7 +108,7 @@ impl AlgorithmScheme {
     }
 
     /// Applies the algorithm scheme to the input string until the algorithm is completed.
-    /// 
+    ///
     /// # Arguments
     /// - `word` — the input string.
     /// - `steps_limit` — the maximum number of steps to do.

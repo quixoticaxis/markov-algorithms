@@ -17,7 +17,11 @@
 *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-use std::{sync::mpsc::{Receiver, Sender, channel}, thread::{JoinHandle, self}, io::stdin};
+use std::{
+    io::stdin,
+    sync::mpsc::{channel, Receiver, Sender},
+    thread::{self, JoinHandle},
+};
 
 use anyhow::{Context, Ok, Result};
 
