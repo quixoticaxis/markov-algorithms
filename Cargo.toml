@@ -1,6 +1,6 @@
 [package]
 name = "markov-algorithms"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 license = "GPL-3.0"
 description = "Rust implementation of Markov algorithms."
@@ -20,6 +20,8 @@ path = "src/simple_cli.rs"
 
 [dependencies]
 thiserror = "1.*"
+anyhow = "1.*"
+ctrlc = "3.*"
 
 [dependencies.clap]
 version = "3.*"
