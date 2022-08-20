@@ -1,44 +1,52 @@
 # markov-algorithms
 Rust implementation of [Markov algorithms](https://en.wikipedia.org/wiki/Markov_algorithm).
 
-This crate is created purely for educational purposes.
+This crate is created purely for educational purposes and is published under GPL-3.0 license.
+
+The documentation can be found on [docs.rs](https://docs.rs/markov-algorithms).
 
 ## Library
 You can use the crate as a library.
 
 Add the dependency to `Cargo.toml`:
 ```toml
-markov-algorithms = "0.*"
+markov-algorithms = "0.4"
 ```
 
 Define a scheme of the algorithm:
 ```rust
-use markovalgorithms::*;
+use std::str;
+use markovalgorithms::prelude::*;
 
-// scheme definition should have only the characters
-// that belong to the extended alphabet (whitespace is also a character)
-let scheme_definition = "a→b\nb→c\nc→⋅4";
-
-// default configuration uses '→' as delimiter,'⋅' as final marker,
-// and includes latin letters, digits, and '|' in the alphabet 
-let configuration = Default::default();
-let scheme = AlgorithmScheme::new(&configuration, scheme_definition).unwrap();
+let alphabet = str::parse::<Alphabet>("abc").unwrap().extend('d').unwrap();
+let scheme = AlgorithmSchemeBuilder::new()
+    .with_alphabet(alphabet)
+    .build_with_formula_definitions(["a→⋅d"].into_iter())
+    .unwrap();
 ```
 Apply the scheme:
 ```rust
-let string = "aaabc";
-// the application attempts are limited by the second argument
-let result = scheme.apply(string, 10).unwrap();
+let result = scheme.apply("abc", 1).unwrap();
 
-assert_eq!("4cccc", result.string());
-assert_eq!(8, result.steps_taken())
+assert_eq!("dbc", result.word());
+assert_eq!(1, result.steps_done());```
+```
+You may also apply the scheme once to inspect a single step of the algorithm or get an iterator to apply the scheme step by step:
+```rust
+let mut iterator = scheme.get_application_iterator("abc").unwrap();
+
+assert_eq!("dbc", iterator.next().unwrap().word());
+assert_eq!(None, iterator.next())
 ```
 
+### Examples
+See the `/tests` forlder for more complex schemes.
+
 ## Tool
-You can use a simple clap-based CLI tool to execute algorithms defined by the schemes loaded from a UTF-8 files.
+You can use a simple clap-based CLI tool to execute algorithms defined by the schemes loaded from UTF-8 files.
 
 Install with cargo:
 ```
 cargo install markov-algorithms
 ```
-It would install markovalgorithms-cli tool.
+It would install `markovalgorithms-cli` tool.

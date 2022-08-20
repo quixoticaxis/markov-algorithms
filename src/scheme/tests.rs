@@ -1,141 +1,403 @@
+/*
+*    markov-algorithms — Rust implementation of Markov Algorithms.
+*
+*    Copyright (C) 2022 by Sergey Ivanov <quixoticaxisgit@gmail.com, quixoticaxisgit@mail.ru>
+*
+*    This program is free software: you can redistribute it and/or modify
+*    it under the terms of the GNU General Public License as published by
+*    the Free Software Foundation, either version 3 of the License, or
+*    (at your option) any later version.
+*
+*    This program is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*    GNU General Public License for more details.
+*
+*    You should have received a copy of the GNU General Public License
+*    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+use std::str::FromStr;
+
+use crate::prelude::{AlgorithmSchemeBuilder, Alphabet};
+
 use super::*;
 
 #[test]
-fn scheme_can_be_created_if_all_characters_belong_to_the_alphabet_and_formulas_are_well_formed() {
-    let scheme_definition = "ab→⋅|cd\ndf→ab".to_owned();
+fn a_scheme_can_be_applied_if_the_input_string_contains_only_characters_that_belong_to_the_alphabet(
+) {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
 
-    let configuration = Default::default();
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
 
-    let creation_result = AlgorithmScheme::new(&configuration, &scheme_definition);
+    let result = scheme.apply("abc", 1).unwrap();
 
-    assert!(creation_result.is_ok());
+    let expected = FullApplicationResult {
+        word: "dbc".to_owned(),
+        steps_done: 1,
+    };
+
+    assert_eq!(expected, result);
 }
 
 #[test]
-fn empty_scheme_is_valid() {
-    let scheme_definition = "".to_owned();
+fn a_scheme_cannot_be_applied_if_the_input_string_contains_extension_characters() {
+    let alphabet = Alphabet::from_str("abc")
+        .unwrap()
+        .extend('d')
+        .unwrap()
+        .extend('e')
+        .unwrap();
 
-    let configuration = Default::default();
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
 
-    let creation_result = AlgorithmScheme::new(&configuration, &scheme_definition);
+    let error = scheme.apply("abcde", 1).unwrap_err();
 
-    assert!(creation_result.is_ok());
+    let extpected_error = AlgorithmSchemeFullApplicationError::InputValidationError {
+        source: AlgorithmSchemeInputValidationError::ExtensionCharactersEncountered(
+            "de".to_owned(),
+        ),
+    };
+
+    assert_eq!(extpected_error, error);
 }
 
 #[test]
-fn scheme_cannot_contain_empty_lines() {
-    let scheme_definition = "\n".to_owned();
+fn an_error_is_reported_if_the_input_string_contains_extension_characters() {
+    let alphabet = Alphabet::from_str("abc")
+        .unwrap()
+        .extend('d')
+        .unwrap()
+        .extend('e')
+        .unwrap();
 
-    let configuration = Default::default();
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
 
-    let creation_result = AlgorithmScheme::new(&configuration, &scheme_definition);
+    let error = scheme.apply("abcde", 1).unwrap_err();
 
     assert_eq!(
-        AlgorithmSchemeCreationError::EncounteredEmptyLine,
-        creation_result.unwrap_err()
+        "the input string is not valid: extension characters are found in the input word (extension characters: \"de\")",
+        format!("{error}")
     );
 }
 
 #[test]
-fn scheme_reports_formula_creation_errors() {
-    let scheme_definition = "ab|cd".to_owned();
+fn a_scheme_cannot_be_applied_if_the_input_string_contains_unknown_characters() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
 
-    let configuration = Default::default();
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
 
-    let creation_result = AlgorithmScheme::new(&configuration, &scheme_definition);
+    let error = scheme.apply("abcef", 1).unwrap_err();
 
-    assert!(matches!(
-        creation_result.unwrap_err(),
-        AlgorithmSchemeCreationError::FormulaCreationFailed { source: _ }
-    ));
+    let extpected_error = AlgorithmSchemeFullApplicationError::InputValidationError {
+        source: AlgorithmSchemeInputValidationError::UnknownCharactersEncountered("ef".to_owned()),
+    };
+
+    assert_eq!(extpected_error, error);
 }
 
 #[test]
-fn empty_scheme_can_be_applied() {
-    let scheme_definition = "".to_owned();
+fn an_error_is_reported_if_the_input_string_contains_unknown_characters() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
 
-    let configuration = Default::default();
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
 
-    let scheme = AlgorithmScheme::new(&configuration, &scheme_definition).unwrap();
-
-    let application_result = scheme.apply(Default::default(), 1);
+    let error = scheme.apply("abcef", 1).unwrap_err();
 
     assert_eq!(
-        ApplicationResult::new(1, "".to_owned()),
-        application_result.unwrap()
+        "the input string is not valid: unsupported characters are found in the input word (unsupported characters: \"ef\")",
+        format!("{error}")
     );
 }
 
 #[test]
-fn application_can_complete_due_to_reaching_termination_rule() {
-    let scheme_definition = concat!("c→b\n", "b→a\n", "a→⋅a").to_owned();
+fn a_scheme_cannot_be_fully_applied_if_the_steps_limit_is_zero() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
 
-    let configuration = Default::default();
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["b→b"].into_iter())
+        .unwrap();
 
-    let scheme = AlgorithmScheme::new(&configuration, &scheme_definition).unwrap();
+    let error = scheme.apply("abc", 0).unwrap_err();
 
-    let string = "c";
+    let extpected_error = AlgorithmSchemeFullApplicationError::ZeroStepsLimit;
 
-    let application_result = scheme.apply(string, 1_000);
+    assert_eq!(extpected_error, error);
+}
+
+#[test]
+fn an_error_is_reported_if_the_steps_limit_is_zero() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["b→a"].into_iter())
+        .unwrap();
+
+    let error = scheme.apply("abc", 0).unwrap_err();
 
     assert_eq!(
-        ApplicationResult::new(3, "a".to_owned()),
-        application_result.unwrap()
+        "the algorithm should be allowed to do at least one step",
+        format!("{error}")
     );
 }
 
 #[test]
-fn application_can_complete_due_to_no_rules_applicable() {
-    let scheme_definition = concat!("c→c\n", "b→b\n", "a→a").to_owned();
+fn a_scheme_cannot_be_fully_applied_if_the_algorithm_does_not_complete_in_a_set_number_of_steps() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
 
-    let configuration = Default::default();
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["b→b"].into_iter())
+        .unwrap();
 
-    let scheme = AlgorithmScheme::new(&configuration, &scheme_definition).unwrap();
+    let error = scheme.apply("abc", 1).unwrap_err();
 
-    let string = "dfdfdf".to_owned();
+    let extpected_error = AlgorithmSchemeFullApplicationError::HitTheStepsLimit(1);
 
-    let application_result = scheme.apply(&string, 1);
+    assert_eq!(extpected_error, error);
+}
+
+#[test]
+fn an_error_is_reported_if_the_algorithm_does_not_complete_in_a_set_number_of_steps() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["b→b"].into_iter())
+        .unwrap();
+
+    let error = scheme.apply("abc", 1).unwrap_err();
 
     assert_eq!(
-        ApplicationResult::new(1, string),
-        application_result.unwrap()
+        "the application is not completed after reaching step 1",
+        format!("{error}")
     );
 }
 
 #[test]
-fn application_can_fail_on_strings_that_contain_characters_not_belonging_to_the_alphabet() {
-    let scheme_definition = concat!("c→c\n", "b→b\n", "a→a").to_owned();
+fn a_scheme_can_be_applied_at_least_once_if_the_input_string_contains_only_characters_that_belong_to_the_alphabet(
+) {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
 
-    let configuration = Default::default();
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
 
-    let scheme = AlgorithmScheme::new(&configuration, &scheme_definition).unwrap();
+    let result = scheme.apply_once("abc");
 
-    let string = "ф".to_owned();
-
-    let application_result = scheme.apply(&string, 1_000);
-
-    assert_eq!(
-        AlgorithmSchemeApplicationError::UnknownCharacterEncountered('ф'),
-        application_result.unwrap_err()
-    );
+    assert!(result.is_ok());
 }
 
 #[test]
-fn application_can_fail_due_to_reaching_step_limit() {
-    let scheme_definition = concat!("c→c\n", "b→b\n", "a→a").to_owned();
+fn a_scheme_application_may_yield_the_final_result() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
 
-    let limit = 10;
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
 
-    let configuration = Default::default();
+    let result = scheme.apply_once("abc").unwrap();
 
-    let scheme = AlgorithmScheme::new(&configuration, &scheme_definition).unwrap();
+    let expected = SingleApplicationResult::Final(SingleApplicationData {
+        word: "dbc".to_owned(),
+        applied_formula_definition: Some("a→⋅d"),
+    });
 
-    let string = "b".to_owned();
+    assert_eq!(expected, result);
+}
 
-    let application_result = scheme.apply(&string, limit);
+#[test]
+fn a_scheme_application_yields_the_final_with_no_formula_if_no_substitution_formula_is_applied() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
+
+    let result = scheme.apply_once("bbb").unwrap();
+
+    let expected = SingleApplicationResult::Final(SingleApplicationData {
+        word: "bbb".to_owned(),
+        applied_formula_definition: None,
+    });
+
+    assert_eq!(expected, result);
+}
+
+#[test]
+fn a_scheme_application_may_yield_the_intermediate_result() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→d"].into_iter())
+        .unwrap();
+
+    let result = scheme.apply_once("abc").unwrap();
+
+    let expected = SingleApplicationResult::Intermediate(SingleApplicationData {
+        word: "dbc".to_owned(),
+        applied_formula_definition: Some("a→d"),
+    });
+
+    assert_eq!(expected, result);
+}
+
+#[test]
+fn a_scheme_cannot_be_applied_even_once_if_the_input_string_contains_extension_characters() {
+    let alphabet = Alphabet::from_str("abc")
+        .unwrap()
+        .extend('d')
+        .unwrap()
+        .extend('e')
+        .unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
+
+    let error = scheme.apply_once("abcde").unwrap_err();
+
+    let extpected_error =
+        AlgorithmSchemeInputValidationError::ExtensionCharactersEncountered("de".to_owned());
+
+    assert_eq!(extpected_error, error);
+}
+
+#[test]
+fn a_scheme_cannot_be_applied_even_once_if_the_input_string_contains_unknown_characters() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
+
+    let error = scheme.apply_once("abcef").unwrap_err();
+
+    let extpected_error =
+        AlgorithmSchemeInputValidationError::UnknownCharactersEncountered("ef".to_owned());
+
+    assert_eq!(extpected_error, error);
+}
+
+#[test]
+fn scheme_may_yield_an_iterator_if_the_input_string_contains_only_characters_that_belong_to_the_alphabet(
+) {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
+
+    let result = scheme.get_application_iterator("abc");
+
+    assert!(result.is_ok());
+}
+
+#[test]
+fn a_scheme_cannot_yield_an_iterator_if_the_input_string_contains_extension_characters() {
+    let alphabet = Alphabet::from_str("abc")
+        .unwrap()
+        .extend('d')
+        .unwrap()
+        .extend('e')
+        .unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
+
+    let error = scheme.get_application_iterator("abcde").unwrap_err();
+
+    let extpected_error =
+        AlgorithmSchemeInputValidationError::ExtensionCharactersEncountered("de".to_owned());
+
+    assert_eq!(extpected_error, error);
+}
+
+#[test]
+fn a_scheme_cannot_yield_an_iterator_if_the_input_string_contains_unknown_characters() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→⋅d"].into_iter())
+        .unwrap();
+
+    let error = scheme.get_application_iterator("abcef").unwrap_err();
+
+    let extpected_error =
+        AlgorithmSchemeInputValidationError::UnknownCharactersEncountered("ef".to_owned());
+
+    assert_eq!(extpected_error, error);
+}
+
+#[test]
+fn a_scheme_appication_may_be_viewed_through_iterator_step_by_step() {
+    let alphabet = Alphabet::from_str("abc").unwrap().extend('d').unwrap();
+
+    let scheme = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet)
+        .build_with_formula_definitions(["a→b", "b→c", "ccc→⋅d"].into_iter())
+        .unwrap();
+
+    let mut iterator = scheme.get_application_iterator("abc").unwrap();
 
     assert_eq!(
-        AlgorithmSchemeApplicationError::HitTheStepsLimit(limit),
-        application_result.unwrap_err()
+        Some(SingleApplicationData {
+            word: "bbc".to_owned(),
+            applied_formula_definition: Some("a→b")
+        }),
+        iterator.next()
     );
+
+    assert_eq!(
+        Some(SingleApplicationData {
+            word: "cbc".to_owned(),
+            applied_formula_definition: Some("b→c")
+        }),
+        iterator.next()
+    );
+
+    assert_eq!(
+        Some(SingleApplicationData {
+            word: "ccc".to_owned(),
+            applied_formula_definition: Some("b→c")
+        }),
+        iterator.next()
+    );
+
+    assert_eq!(
+        Some(SingleApplicationData {
+            word: "d".to_owned(),
+            applied_formula_definition: Some("ccc→⋅d")
+        }),
+        iterator.next()
+    );
+
+    assert_eq!(None, iterator.next());
 }
