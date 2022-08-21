@@ -23,7 +23,7 @@ use rand::seq::SliceRandom;
 
 use markovalgorithms::prelude::*;
 
-/// A scheme of the algorithm that, when applied to a string in alphabet `[] 'a', 'b', 'c', 'A', 'B', 'C', '"']`,
+/// A scheme of the algorithm that, when applied to a string in alphabet `[ 'a', 'b', 'c', 'A', 'B', 'C', '"' ]`,
 /// capitalizes the first letter and capitalizes each quoted segment.
 ///
 /// The scheme uses the alphabet extended with `[ '|', '+', '-', ';', '_', 'e' ]`.
