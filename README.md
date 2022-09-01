@@ -1,5 +1,5 @@
 # markov-algorithms
-Rust implementation of [Markov algorithms](https://en.wikipedia.org/wiki/Markov_algorithm).
+Rust implementation of [Markov algorithms](https://en.wikipedia.org/wiki/Markov_algorithm) executor.
 
 This crate is created purely for educational purposes and is published under GPL-3.0 license.
 
@@ -49,4 +49,4 @@ Install with cargo:
 ```
 cargo install markov-algorithms
 ```
-It would install `markovalgorithms-cli` tool.
+It would install `markovalgorithms-cli` tool. Launch `markovalgorithms-cli` with `--help` flag to see the descriptions of parameters and usage example.
