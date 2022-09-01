@@ -215,7 +215,11 @@ impl<'a> PropertyAssertions<'a> {
                     self.properties.delimiter,
                 ),
             )
-        } else if self.properties.alphabet.contains_extended(self.properties.delimiter) {
+        } else if self
+            .properties
+            .alphabet
+            .contains_extended(self.properties.delimiter)
+        {
             Err(
                 AlgorithmSchemeDefinitionError::DelimiterBelongsToTheAlphabet(
                     self.properties.delimiter,

@@ -69,12 +69,25 @@ fn main() -> Result<()> {
 )]
 struct Cli {
     /// An optional string of characters to be used as an alphabet.
-    #[clap(short, long, value_parser, value_name = "ALPHABET_CHARACTERS", display_order = 1)]
+    #[clap(
+        short,
+        long,
+        value_parser,
+        value_name = "ALPHABET_CHARACTERS",
+        display_order = 1
+    )]
     alphabet: Option<String>,
 
     /// An optional string of characters to be used as an alphabet extension.
     /// This option can be used only together with --alphabet.
-    #[clap(short = 'e', long, value_parser, value_name = "EXTENSION_CHARACTERS", requires = "alphabet", display_order = 2)]
+    #[clap(
+        short = 'e',
+        long,
+        value_parser,
+        value_name = "EXTENSION_CHARACTERS",
+        requires = "alphabet",
+        display_order = 2
+    )]
     alphabet_extension: Option<String>,
 
     /// An optional character to be used as a delimiter.
@@ -86,7 +99,13 @@ struct Cli {
     final_marker: Option<char>,
 
     /// The UTF-8 file that contains the algorithm scheme. Each rule should take its own line. Empty lines are forbidden.
-    #[clap(short, long, value_parser, value_name = "PATH-TO-FILE", display_order = 0)]
+    #[clap(
+        short,
+        long,
+        value_parser,
+        value_name = "PATH-TO-FILE",
+        display_order = 0
+    )]
     scheme: PathBuf,
 
     /// An input string.

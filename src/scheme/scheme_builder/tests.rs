@@ -165,7 +165,7 @@ fn the_scheme_cannot_be_built_if_the_final_marker_belongs_to_the_alphabet() {
 #[test]
 fn the_scheme_cannot_be_built_if_the_final_marker_belongs_to_the_alphabet_extension() {
     let alphabet: Alphabet = "ab".try_into().unwrap();
-    
+
     let builder = AlgorithmSchemeBuilder::new()
         .with_alphabet(alphabet.extend('⋅').unwrap())
         .with_delimiter('→')
