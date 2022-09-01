@@ -112,6 +112,24 @@ fn the_scheme_cannot_be_built_if_the_delimiter_belongs_to_the_alphabet() {
 }
 
 #[test]
+fn the_scheme_cannot_be_built_if_the_delimiter_belongs_to_the_alphabet_extension() {
+    let alphabet: Alphabet = "ab".try_into().unwrap();
+
+    let builder = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet.extend('→').unwrap())
+        .with_delimiter('→')
+        .with_final_marker('⋅');
+
+    let error = builder
+        .build_with_formula_definitions(["a→b"].into_iter())
+        .unwrap_err();
+
+    let expected_error = AlgorithmSchemeDefinitionError::DelimiterBelongsToTheAlphabet('→');
+
+    assert_eq!(expected_error, error);
+}
+
+#[test]
 fn an_error_is_reported_if_the_delimiter_belongs_to_the_alphabet() {
     let builder = AlgorithmSchemeBuilder::new()
         .with_alphabet("ab→".try_into().unwrap())
@@ -136,7 +154,25 @@ fn the_scheme_cannot_be_built_if_the_final_marker_belongs_to_the_alphabet() {
         .with_final_marker('⋅');
 
     let error = builder
-        .build_with_formula_definitions(["a→b"].into_iter())
+        .build_with_formula_definitions(["a→⋅b"].into_iter())
+        .unwrap_err();
+
+    let expected_error = AlgorithmSchemeDefinitionError::FinalMarkerBelongsToTheAlphabet('⋅');
+
+    assert_eq!(expected_error, error);
+}
+
+#[test]
+fn the_scheme_cannot_be_built_if_the_final_marker_belongs_to_the_alphabet_extension() {
+    let alphabet: Alphabet = "ab".try_into().unwrap();
+    
+    let builder = AlgorithmSchemeBuilder::new()
+        .with_alphabet(alphabet.extend('⋅').unwrap())
+        .with_delimiter('→')
+        .with_final_marker('⋅');
+
+    let error = builder
+        .build_with_formula_definitions(["a→⋅b"].into_iter())
         .unwrap_err();
 
     let expected_error = AlgorithmSchemeDefinitionError::FinalMarkerBelongsToTheAlphabet('⋅');

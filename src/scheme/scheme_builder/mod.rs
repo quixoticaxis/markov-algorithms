@@ -215,7 +215,7 @@ impl<'a> PropertyAssertions<'a> {
                     self.properties.delimiter,
                 ),
             )
-        } else if self.properties.alphabet.contains(self.properties.delimiter) {
+        } else if self.properties.alphabet.contains_extended(self.properties.delimiter) {
             Err(
                 AlgorithmSchemeDefinitionError::DelimiterBelongsToTheAlphabet(
                     self.properties.delimiter,
@@ -224,7 +224,7 @@ impl<'a> PropertyAssertions<'a> {
         } else if self
             .properties
             .alphabet
-            .contains(self.properties.final_marker)
+            .contains_extended(self.properties.final_marker)
         {
             Err(
                 AlgorithmSchemeDefinitionError::FinalMarkerBelongsToTheAlphabet(
