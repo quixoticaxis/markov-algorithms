@@ -168,7 +168,8 @@ fn iterate_over_scheme_results(scheme: &AlgorithmScheme, word: &str) -> Result<(
     let mut input_handler = UserInputHandler::setup()?;
 
     for (step, result) in iterator.enumerate() {
-        final_step = step;
+        final_step = step.checked_add(1)
+            .with_context(|| "Too many steps taken")?;
 
         let new_word = result.word();
 
