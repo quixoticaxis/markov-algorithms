@@ -69,19 +69,43 @@ fn main() -> Result<()> {
 )]
 struct Cli {
     /// An optional string of characters to be used as an alphabet.
-    #[clap(short, long, value_parser, value_name = "ALPHABET_CHARACTERS")]
+    #[clap(
+        short,
+        long,
+        value_parser,
+        value_name = "ALPHABET_CHARACTERS",
+        display_order = 1
+    )]
     alphabet: Option<String>,
 
+    /// An optional string of characters to be used as an alphabet extension.
+    /// This option can be used only together with --alphabet.
+    #[clap(
+        short = 'e',
+        long,
+        value_parser,
+        value_name = "EXTENSION_CHARACTERS",
+        requires = "alphabet",
+        display_order = 2
+    )]
+    alphabet_extension: Option<String>,
+
     /// An optional character to be used as a delimiter.
-    #[clap(short, long, value_parser, value_name = "CHARACTER")]
+    #[clap(short, long, value_parser, value_name = "CHARACTER", display_order = 3)]
     delimiter: Option<char>,
 
     /// An optional character to be used as a final marker.
-    #[clap(short, long, value_parser, value_name = "CHARACTER")]
+    #[clap(short, long, value_parser, value_name = "CHARACTER", display_order = 4)]
     final_marker: Option<char>,
 
     /// The UTF-8 file that contains the algorithm scheme. Each rule should take its own line. Empty lines are forbidden.
-    #[clap(short, long, value_parser, value_name = "PATH-TO-FILE")]
+    #[clap(
+        short,
+        long,
+        value_parser,
+        value_name = "PATH-TO-FILE",
+        display_order = 0
+    )]
     scheme: PathBuf,
 
     /// An input string.
@@ -89,11 +113,11 @@ struct Cli {
     string: String,
 
     /// When set, defines the limit of steps the algorithm is allowed to take.
-    #[clap(short, long, value_parser = clap::value_parser!(u32).range(1..), value_name = "NUMBER-OF-STEPS")]
+    #[clap(short, long, value_parser = clap::value_parser!(u32).range(1..), value_name = "NUMBER-OF-STEPS", display_order = 5)]
     limit: Option<u32>,
 
     /// When set, enables interactive iteration through algorithm steps.
-    #[clap(short, long, action)]
+    #[clap(short, long, action, display_order = 6)]
     interactive: bool,
 }
 
@@ -111,14 +135,40 @@ impl Cli {
         } else {
             builder
         };
-        let builder = if let Some(alphabet) = &self.alphabet {
-            builder.with_alphabet(
-                str::parse(alphabet).with_context(|| "Failed to parse the alphabet definition")?,
-            )
+        let builder = if let Some(alphabet) = self
+            .create_alphabet()
+            .with_context(|| "Failed to parse the alphabet provided by the user")?
+        {
+            builder.with_alphabet(alphabet)
         } else {
             builder
         };
+
         Ok(builder)
+    }
+
+    fn create_alphabet(&self) -> Result<Option<Alphabet>> {
+        use std::result::Result::Ok;
+        if let Some(alphabet) = &self.alphabet {
+            let alphabet: Alphabet =
+                str::parse(alphabet).with_context(|| "Failed to parse the alphabet definition")?;
+
+            let alphabet = if let Some(extension) = &self.alphabet_extension {
+                extension
+                    .chars()
+                    .fold(Ok(alphabet), |result, character| match result {
+                        Ok(alphabet) => alphabet.extend(character),
+                        error => error,
+                    })
+                    .with_context(|| "Failed to extend the alphabet definition")?
+            } else {
+                alphabet
+            };
+
+            Ok(Some(alphabet))
+        } else {
+            Ok(None)
+        }
     }
 
     fn read_scheme(&self) -> Result<String> {
@@ -168,7 +218,8 @@ fn iterate_over_scheme_results(scheme: &AlgorithmScheme, word: &str) -> Result<(
     let mut input_handler = UserInputHandler::setup()?;
 
     for (step, result) in iterator.enumerate() {
-        final_step = step.checked_add(1)
+        final_step = step
+            .checked_add(1)
             .with_context(|| "Too many steps taken")?;
 
         let new_word = result.word();
