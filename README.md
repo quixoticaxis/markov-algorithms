@@ -29,7 +29,7 @@ Apply the scheme:
 let result = scheme.apply("abc", 1).unwrap();
 
 assert_eq!("dbc", result.word());
-assert_eq!(1, result.steps_done());```
+assert_eq!(1, result.steps_done());
 ```
 You may also apply the scheme once to inspect a single step of the algorithm or get an iterator to apply the scheme step by step:
 ```rust
