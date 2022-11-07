@@ -65,7 +65,7 @@ a→1
 →⋅0"##;
 
 #[test]
-fn the_count_is_correct_even_if_the_is_no_occurences() {
+fn the_count_is_correct_even_if_there_are_no_occurences() {
     let scheme = prepare_scheme();
 
     let result = scheme.apply("bccb", 1_000).unwrap();
