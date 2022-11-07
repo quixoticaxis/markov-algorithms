@@ -23,7 +23,7 @@ use rand::seq::SliceRandom;
 
 use markovalgorithms::prelude::*;
 
-/// A scheme of the algorithm that, when applied to a string in alphabet `[ 'a', 'b', 'c', 'A', 'B', 'C', '"' ]`,
+/// A scheme of the algorithm that, when applied to a string in alphabet `[ 'a', 'b', 'c' ]`,
 /// returns the number of characters `'a'` in the input string.
 ///
 /// The scheme uses the alphabet extended with digits and `'|'`.
@@ -65,7 +65,7 @@ a→1
 →⋅0"##;
 
 #[test]
-fn the_count_is_correct_even_if_the_is_no_occurences() {
+fn the_count_is_correct_even_if_there_are_no_occurences() {
     let scheme = prepare_scheme();
 
     let result = scheme.apply("bccb", 1_000).unwrap();
