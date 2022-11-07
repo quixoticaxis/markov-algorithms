@@ -23,7 +23,7 @@ use rand::seq::SliceRandom;
 
 use markovalgorithms::prelude::*;
 
-/// A scheme of the algorithm that, when applied to a string in alphabet `[ 'a', 'b', 'c', 'A', 'B', 'C', '"' ]`,
+/// A scheme of the algorithm that, when applied to a string in alphabet `[ 'a', 'b', 'c' ]`,
 /// returns the number of characters `'a'` in the input string.
 ///
 /// The scheme uses the alphabet extended with digits and `'|'`.
